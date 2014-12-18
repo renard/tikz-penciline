@@ -1,0 +1,51 @@
+\documentclass[border=1cm]{standalone}
+
+\RequirePackage{tikz}
+\RequirePackage{tikz-penciline}
+
+\pgfplotsset{compat=1.8}
+
+
+\begin{document}
+
+\def\Grid{
+  \draw[penciline={jag ratio=3},style=help lines] (-2,-2) grid[step=1cm] (4,4);
+}
+
+\begin{tikzpicture}[penciline={jag ratio=1}]
+  \Grid{}
+  \draw[decorate,thick] (0,0) -- (0,3) -- (3,3);
+
+  \draw[decorate,thick,pattern=north east lines] (-0.4cm,-0.8cm) rectangle (1.2,-2);
+  \draw[penciline={jag ratio=0,},ultra thick,blue] (3,3)  arc (0:-90:2cm);
+
+  \draw[penciline={jag ratio=0},ultra thick,blue] (3,3)  arc (90:0:2cm);
+  
+  \node[penciline={jag ratio=0},draw,inner sep=0.5cm,fill=yellow,circle] (a) at (2,0) {};
+  \node[decorate,draw,inner sep=0.3cm,fill=red] (b) at (2,-2) {};
+  %% This was supposed to be an edge!!
+  \draw[penciline={jag ratio=0},decorate] (b) to[in=-45,out=45] (a);
+  \node[decorate,draw,minimum height=2cm,minimum width=1cm] (c) at (-1.5,0) {};
+  \draw[decorate,->,dashed] (-0.5cm,-0.5cm) -- (-0.5cm,3.5cm)  -| (c.north);
+
+
+  
+\end{tikzpicture}
+
+
+
+
+
+\begin{tikzpicture}[penciline={jag ratio=1}]
+\draw[penciline={jag ratio=5},->](-5,0) -- (5,0); 
+\draw[penciline={jag ratio=5},->](0,-5) -- (0,5); 
+
+\draw[decorate,fill=blue!15,fill opacity=.25]  (-3,-3) rectangle (3,3);
+\draw[penciline={jag ratio=0},fill=green!15,fill opacity=.25] circle [radius=3cm]; 
+\draw[decorate,red,shift={(1,1)},rotate=45,fill=red!25,fill opacity=.5] %
+          (1,1) -- (1,-1) -- (-1,-1) -- (-1,1) -- (1,1);
+\draw[penciline={jag ratio=0.1},color=blue]   plot (\x,{sin(\x r)}) node [decorate,draw] {$\sin(x)$} ;     
+\end{tikzpicture}
+
+
+\end{document}
