@@ -1,0 +1,120 @@
+%% Dimension line for LaTeX/TikZ
+%% Copyright © 2013 Sébastien Gross  <seb•ɑƬ•chezwam•ɖɵʈ•org>
+%%
+%% This file may be distributed and/or modified
+%%
+%% 1. under the LaTeX Project Public License and/or
+%% 2. under the WTF Public License.
+%%
+%%
+%% Simulate naive hand drawing figure.
+%%
+%%
+%% To install it copy the tango directory to either:
+%%   - $TEXHOME/tex/latex/
+%%   - ~/texmf/tex/latex/
+%%   - ~/Library/texmf/tex/latex
+%%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikz-penciline}[2014/12/18 v1.0 initial version]
+
+\RequirePackage{tikz}
+\RequirePackage{ifthen}
+
+\usetikzlibrary{calc,patterns,decorations,plotmarks}
+\usepackage{pgfplots}
+
+\pgfdeclaredecoration{penciline}{initial}{
+  \state{initial}[width=+\pgfdecoratedinputsegmentremainingdistance,
+    auto corner on length=\pgfkeysvalueof{/tikz/penciline/auto corner on length},
+  ]{
+    \ifthenelse
+        {\lengthtest{\pgfkeysvalueof{/tikz/penciline/jag ratio}pt = 0pt}} {
+          \pgfpathcurveto%
+              {% 1st control point
+                \pgfpointpolar
+                    {(\pgfkeysvalueof{/tikz/penciline/arc angle base1}+
+                      \pgfkeysvalueof{/tikz/penciline/arc angle ratio1}*rand)}
+                    {(\pgfkeysvalueof{/tikz/penciline/arc radius base1}+
+                      \pgfkeysvalueof{/tikz/penciline/arc radius ratio1}*rand)*
+                      \pgfdecoratedinputsegmentremainingdistance}
+              }
+              {%% 2nd control point
+                \pgfpointpolar
+                    {(\pgfkeysvalueof{/tikz/penciline/arc angle base2}+
+                      \pgfkeysvalueof{/tikz/penciline/arc angle ratio2}*rand)}
+                    {(\pgfkeysvalueof{/tikz/penciline/arc radius base2}+
+                      \pgfkeysvalueof{/tikz/penciline/arc radius ratio2}*rand)*
+                      \pgfdecoratedinputsegmentremainingdistance}
+              }
+              {% 2nd point (1st one is implicit)
+                \pgfpointadd
+                    {\pgfpointdecoratedinputsegmentlast}
+                    {\pgfpoint
+                      {rand*\pgfkeysvalueof{/tikz/penciline/x offset}}
+                      {rand*\pgfkeysvalueof{/tikz/penciline/y offset}}}
+              }          
+        } {
+          \pgfpathcurveto%
+              {% 1st control point
+                \pgfpoint
+                    {\pgfdecoratedinputsegmentremainingdistance*
+                      (\pgfkeysvalueof{/tikz/penciline/segment x base1}+
+                      \pgfkeysvalueof{/tikz/penciline/segment x ratio1}*rnd)}
+                    {\pgfkeysvalueof{/tikz/penciline/jag ratio}*
+                      rand*\pgfdecorationsegmentamplitude}
+              }
+              {%% 2nd control point
+                \pgfpoint
+                %% Make sure random number is always between origin and target points
+                    {\pgfdecoratedinputsegmentremainingdistance*
+                      (\pgfkeysvalueof{/tikz/penciline/segment x base1}+
+                      \pgfkeysvalueof{/tikz/penciline/segment x ratio1}*rnd)}
+                    {\pgfkeysvalueof{/tikz/penciline/jag ratio}*
+                      rand*\pgfdecorationsegmentamplitude}
+              }
+              {% 2nd point (1st one is implicit)
+                \pgfpointadd
+                    {\pgfpointdecoratedinputsegmentlast}
+                    {\pgfpoint
+                      {rand*\pgfkeysvalueof{/tikz/penciline/x offset}}
+                      {rand*\pgfkeysvalueof{/tikz/penciline/y offset}}}
+              }
+        }
+  }
+  \state{final}{}
+}
+
+
+\tikzset{
+  penciline/.code={\pgfqkeys{/tikz/penciline}{#1}},
+  penciline={
+    jag ratio/.initial=2,
+    decoration/.initial = penciline,
+    auto corner on length/.initial=1pt,
+    segment x base1/.initial=0.5,
+    segment x ratio1/.initial=0.25,
+    segment x base2/.initial=0.5,
+    segment x ratio2/.initial=0.25,
+    arc angle base1/.initial = 20,
+    arc angle ratio1/.initial = 10,
+    arc radius base1/.initial = 0.5,
+    arc radius ratio1/.initial = 0.05,
+    arc angle base2/.initial = 20,
+    arc angle ratio2/.initial = 10,
+    arc radius base2/.initial = 0.5,
+    arc radius ratio2/.initial = 0.05,
+    x offset/.initial = 1,
+    y offset/.initial = 1,
+  },
+  penciline/.style = {
+    decorate,
+    penciline/.cd,
+    #1,
+    /tikz/.cd,
+  },
+  decorate,
+  decoration=penciline
+}
+
