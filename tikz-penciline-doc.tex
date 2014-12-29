@@ -1,0 +1,343 @@
+
+\documentclass[a4paper]{article}
+
+\usepackage[all]{nowidow}
+\widowpenalty10000
+\clubpenalty10000
+
+
+%% See http://tex.stackexchange.com/questions/78334/print-system-information-in-latex-doc
+\RequirePackage{ifxetex}
+\ifxetex
+\RequirePackage{fontspec}
+\RequirePackage{xltxtra}
+\newcommand{\myxetex}{\XeLaTeX}
+\newcommand{\compilator}{\XeLaTeX{}}
+\newcommand{\cversion}{\the\XeTeXversion\XeTeXrevision}
+\else
+\RequirePackage[utf8]{inputenc}
+\newcommand{\myxetex}{\texttt{XeLaTeX}}
+\newcommand{\compilator}{\LaTeX{}}
+\makeatletter
+\newcommand{\cversion}{
+  \ifnum\pdftexversion<100 %
+  \the\pdftexversion.\pdftexrevision
+  \else
+  \ifnum\pdftexversion<130 %
+  \expandafter\@car\the\pdftexversion\@empty\@nil.%
+  \expandafter\@cdr\the\pdftexversion\@empty\@nil  
+  \pdftexrevision
+  \else
+  \expandafter\@car\the\pdftexversion\@empty\@nil.%
+  \expandafter\@cdr\the\pdftexversion\@empty\@nil.%
+  \pdftexrevision
+  \fi
+  \fi
+}
+\makeatother
+\fi
+
+\makeatletter
+\newcommand{\tcbversion}{\tcb@version}
+\makeatother
+
+\RequirePackage{etoolbox}
+\RequirePackage{minted}
+
+%% http://tex.stackexchange.com/questions/132888/fontawesome-font-not-found
+%% https://github.com/wspr/fontspec/issues/165
+\defaultfontfeatures{
+  Scale=MatchLowercase,
+  Path = /usr/local/texlive/2014/texmf-dist/fonts/opentype/public/fontawesome/ }
+\RequirePackage{fontawesome}
+
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,listings}
+\tcbuselibrary{minted}
+\tcbuselibrary{documentation}
+
+\usepackage{tikz-penciline}
+\usetikzlibrary{calc}
+\newminted[srcGrid]{latex}{baselinestretch=0.5,fontsize=\footnotesize}
+
+
+\newtcblisting{exampleB}[2][]{%
+  colframe=red!50!yellow!50!black,
+  colback=white,
+  coltitle=red!50!yellow!3!white,
+  bicolor,colbacklower=red!50!yellow!5!white,
+  fonttitle=\sffamily\bfseries,
+  center upper,
+  minted language=latex,
+  minted options={baselinestretch=0.5,fontsize=\scriptsize},
+  %%lefthand ratio=0.33,
+  %%sidebyside,
+  text and listing,
+  title=#2,#1}
+
+\newtcblisting{exampleA}[2][]{%
+  colframe=red!50!yellow!50!black,
+  colback=white,
+  coltitle=red!50!yellow!3!white,
+  bicolor,colbacklower=red!50!yellow!5!white,
+  fonttitle=\sffamily\bfseries,
+  center upper,
+  minted language=latex,
+  minted options={baselinestretch=0.5,fontsize=\scriptsize},
+  %%lefthand ratio=0.33,
+  %%sidebyside,
+  listing,
+  title=#2,#1}
+
+\newcommand{\PGF}{\textsc{PGF}}
+\newcommand{\TikZ}{Ti\textcolor{orange}{\emph{k}}Z}
+
+\title{ \texttt{tikz-penciline}\\ Hand drawing with \PGF/\TikZ\\ }
+\author{Sébastien Gross\\
+  \faEnvelope ~ \texttt{seb•$\alpha\tau$•chezwam•$\partial\theta\tau$•org}\\
+  \faTwitter ~ \texttt{@renard\_0}\\
+  \faGithub ~ \texttt{https://github.com/renard/tikz-penciline}
+}
+\date{\csname ver@tikz-penciline.sty\endcsname\footnotetext{This
+    documentation was compiled on {\platformname} using {\compilator}
+    {\cversion}, {\PGF} {\pgfversion}, \texttt{tcolorbox} {\tcbversion} on
+    {\today}.}}
+
+\begin{document}
+
+\maketitle
+
+
+\texttt{tikz-penciline} is based on \textit{percusse} answer from
+StackExachange's \textit{simulating hand drawn
+  lines}\footnote{http://tex.stackexchange.com/questions/39296}.  The
+original idead is to make a \docAuxEnvironment*{tikzpicture} look like if it
+was hand drawn.
+
+\begin{tcolorbox}[title={Contents},fonttitle=\bfseries\Large,
+  colback=yellow!10!white,colframe=red!50!black,before=\par\bigskip\noindent]
+  \makeatletter
+  \@starttoc{toc}
+  \makeatother
+  %\tableofcontents
+\end{tcolorbox}
+
+
+\newpage
+
+
+\section{Overview}
+
+The original image looks to someting similar to:
+
+%% \begin{exampleB}{}
+  \begin{tikzpicture}[]
+    \draw[style=help lines] (-2,-2) grid[step=1cm] (4,4);
+    \draw[thick] (0,0) -- (0,3) -- (3,3);
+     %% This is supposed to be an arc!!
+    \draw[ultra thick,blue] (3,3)  arc (0:-90:2cm);
+    \draw[thick,pattern=north east lines] (-0.4cm,-0.8cm) rectangle (1.2,-2);
+     %% That's not even an ellipse !!
+    \node[draw,inner sep=0.5cm,fill=yellow,circle] (a) at (2,0) {};
+    \node[draw,inner sep=0.3cm,fill=red] (b) at (2,-2) {};
+     %% This was supposed to be an edge!!
+    \draw[] (b) to[in=-45,out=45] (a);
+    \node[draw,minimum height=2cm,minimum width=1cm] (c) at (-1.5,0) {};
+    \draw[->,dashed] (-0.5cm,-0.5cm) -- (-0.5cm,3.5cm)  -| (c.north);
+  \end{tikzpicture}
+%%\end{exampleB}
+
+The \docAuxEnvironment*{penciline} version looks to someting similar to:
+
+\begin{exampleB}{}
+  \begin{tikzpicture}[penciline={jag ratio=1}]
+    \draw[decorate,penciline={jag ratio=2},style=help lines] (-2,-2)
+    grid[step=1cm] (4,4);
+    \draw[decorate,thick] (0,0) -- (0,3) -- (3,3);
+     %% This is supposed to be an arc!!
+    \draw[decorate,penciline={jag ratio=0,arc angle base2=90},ultra thick,blue] (3,3) arc (0:-90:2cm);
+    \draw[decorate,penciline={jag ratio=0},ultra thick,blue] (3,0.5) arc (0:90:2cm);
+    \draw[decorate,thick,pattern=north east lines] (-0.4cm,-0.8cm) rectangle (1.2,-2);
+     %% That's not even an ellipse !!
+    \node[decorate,penciline={jag ratio=0,arc radius base1=0.4,arc radius base2=.6},
+      draw,inner sep=0.5cm,fill=yellow,circle] (a) at (2,0) {};
+    \node[decorate,draw,inner sep=0.3cm,fill=red] (b) at (2,-2) {};
+     %% This was supposed to be an edge!!
+    \draw[decorate,penciline={jag ratio=0}] (b) to[in=-45,out=45] (a);
+    \node[decorate,draw,minimum height=2cm,minimum width=1cm] (c) at (-1.5,0) {};
+    \draw[decorate,->,dashed] (-0.5cm,-0.5cm) -- (-0.5cm,3.5cm)  -| (c.north);
+  \end{tikzpicture}
+\end{exampleB}
+
+
+\newpage
+
+
+\section{Installation}
+
+To install the \docAuxEnvironment*{tkiz-penciline} package copy its directory
+to either to
+\begin{itemize}
+\item \verb"$TEXHOME/tex/latex/"
+\item \verb"$TEXMFHOME/tex/latex/"
+\item \verb"~/texmf/tex/latex/"
+\item \verb"~/Library/texmf/tex/latex/"
+\end{itemize}
+
+\section{Usage}
+
+Basically you only have to declare \docAuxEnvironment*{penciline} and
+\docAuxEnvironment*{decorate} option to path you want to look hand drawn.
+
+
+\subsection{customization}
+
+\begin{docKey}{jag ration}{=\meta{float}}{2.0}
+  This value controls the \textit{jag} value. The higher the it is, the most
+  deformed the drawing will be. Best value are between $2$ and $5$.
+
+  If the path is a circle or an arc you should set \docAuxKey{jag ratio} to
+  $0$ for better results.
+\end{docKey}
+
+
+\begin{docKey}{segment x base1}{=\meta{float}}{0.5}
+  This is the base for the $x$ coordinate of first control point. The
+  formula is given by:
+
+  \textit{length} *
+  (\docAuxKey{segment x base1} + \docAuxKey{segment x ratio1} * rnd)
+
+  This means by default that that the $x$ coordinate is about in the middle
+  of the segment.
+\end{docKey}
+
+\begin{docKey}{segment x ratio1}{=\meta{float}}{0.25}
+  This is the randomized ratio part of the $x$ coordinate of first control
+  point (see \refKey{segment x base1}).
+\end{docKey}
+
+\begin{docKey}{segment x base2}{=\meta{float}}{0.5}
+  Base for second control point (see \refKey{segment x base1}).
+\end{docKey}
+
+\begin{docKey}{segment x ratio2}{=\meta{float}}{0.25}
+  Random ratio for second control point (see \refKey{segment x ratio1}).
+\end{docKey}
+
+
+\begin{docKey}{arc angle base1}{=\meta{float}}{20}
+  This is the base of the angle of the polar coordinate for the first
+  control point. The formula is given by:
+
+  \docAuxKey{arc angle base1} + rand * \docAuxKey{arc angle ratio1}
+
+  This means that the angle is \docAuxKey{arc angle base1} $\pm$
+  \docAuxKey{arc angle ratio1}.
+\end{docKey}
+
+\begin{docKey}{arc angle ratio1}{=\meta{float}}{10}
+  This is the ratio (variable) part of the angle of the polar coordinate for
+  the first control point (see \refKey{arc angle base1}).
+\end{docKey}
+
+\begin{docKey}{arc radius base1}{=\meta{float}}{0.3}
+  This is the base of the radius of the polar coordinate for the first
+  control point. The formula is given by:
+
+  \textit{length} *
+  \docAuxKey{arc radius base1} + rand * \docAuxKey{arc radius ratio1}
+
+\end{docKey}
+
+\begin{docKey}{arc radius ratio1}{=\meta{float}}{0.05}
+  This is the ratio (variable) part of the radius of the polar coordinate for
+  the first control point (see \refKey{arc radius base1}).
+\end{docKey}
+
+
+\begin{docKey}{arc angle base2}{=\meta{float}}{-90}
+  Base angle for the second control point. See \refKey{arc angle base1}.
+\end{docKey}
+
+\begin{docKey}{arc angle ratio2}{=\meta{float}}{-10}
+  Variable part of the angle for the second control point. See \refKey{arc angle ratio1}.
+\end{docKey}
+
+\begin{docKey}{arc radius base2}{=\meta{float}}{0.7}
+    Base of the radius for the second control point. See \refKey{arc radius base1}.
+\end{docKey}
+
+\begin{docKey}{arc radius ratio2}{=\meta{float}}{0.05}
+    Variable part of the radius for the second control point. See
+    \refKey{arc radius ratio1}.
+\end{docKey}
+
+
+\begin{docKey}{x offset}{=\meta{float}}{1}
+  Maximum $x$ offset for target point.
+\end{docKey}
+
+\begin{docKey}{y offset}{=\meta{float}}{1}
+  Maximum $y$ offset for target point.
+\end{docKey}
+
+
+
+
+
+
+%% \begin{tikzpicture}[]
+%%   \draw[color=red,line width=0.01]
+%%   coordinate (A) at (-.25,.25) {} plot[mark=x] (A) node [below] at (A) {\tiny{A}}
+%%   coordinate (B) at (3.25,2.75) {} plot[mark=x] (B) node [below] at (B) {\tiny{B}};
+
+%%   \draw
+%%   coordinate (sx1min) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base1}!(B)$) {}
+%%   coordinate (sx1max) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base1}+\pgfkeysvalueof{/tikz/penciline/segment x ratio1}!(B)$) {}
+%%   coordinate (sx2min) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base2}!(B)$) {}
+%%   coordinate (sx2max) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base2}+\pgfkeysvalueof{/tikz/penciline/segment x ratio1}!(B)$) {};
+
+  
+%%   \draw
+%%   coordinate (M1) at ($(sx1min)!\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {}
+%%   coordinate (M2) at ($(sx1max)!\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {}
+%%   coordinate (M3) at ($(sx1min)!-\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {}
+%%   coordinate (M4) at ($(sx1max)!-\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {};
+
+%%   \draw
+%%   coordinate (N1) at ($(sx2min)!\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {}
+%%   coordinate (N2) at ($(sx2max)!\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {}
+%%   coordinate (N3) at ($(sx2min)!-\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {}
+%%   coordinate (N4) at ($(sx2max)!-\pgfkeysvalueof{/tikz/penciline/jag ratio}*\pgfdecorationsegmentamplitude!90:(A)$) {};
+
+  
+%%   \draw[] (M1) -- (M3) -- (M4) -- (M2) -- cycle;
+%%   \draw[color=blue] (N1) -- (N3) -- (N4) -- (N2) -- cycle;
+
+%% \end{tikzpicture}
+
+
+
+
+%% \begin{tikzpicture}[]
+%%   \draw[color=red,line width=0.01]
+%%   coordinate (A) at (-.25,.25) {} plot[mark=x] (A) node [below] at (A) {\tiny{A}}
+%%   coordinate (B) at (3.25,2.75) {} plot[mark=x] (B) node [below] at (B) {\tiny{B}};
+
+%%   \draw
+%%   coordinate (sx1min) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base1}!(B)$) {}
+%%   coordinate (sx1max) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base1}+\pgfkeysvalueof{/tikz/penciline/segment x ratio1}!(B)$) {}
+%%   coordinate (sx2min) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base2}!(B)$) {}
+%%   coordinate (sx2max) at ($(A)!\pgfkeysvalueof{/tikz/penciline/segment x base2}+\pgfkeysvalueof{/tikz/penciline/segment x ratio1}!(B)$) {};
+
+%%   \draw let \p1 = ($ (A) - (B) $), \n1={veclen(\x1,\y1)} in (A);
+%%   \draw[fill=gray!30]  (A) arc
+%%   ($\pgfkeysvalueof{/tikz/penciline/arc angle base1}+\pgfkeysvalueof{/tikz/penciline/arc angle ratio1}:\pgfkeysvalueof{/tikz/penciline/arc angle base1}-\pgfkeysvalueof{/tikz/penciline/arc angle ratio1}:\pgfkeysvalueof{/tikz/penciline/arc radius base1}+\pgfkeysvalueof{/tikz/penciline/arc radius ratio1}$);
+
+%% \end{tikzpicture}
+
+
+
+
+\end{document}
