@@ -17,9 +17,9 @@
   \draw[decorate,thick] (0,0) -- (0,3) -- (3,3);
 
   \draw[decorate,thick,pattern=north east lines] (-0.4cm,-0.8cm) rectangle (1.2,-2);
-  \draw[penciline={jag ratio=0,},ultra thick,blue] (3,3)  arc (0:-90:2cm);
+  \draw[penciline={jag ratio=0,arc angle base2=90},ultra thick,blue] (3,3)  arc (0:-90:2cm);
 
-  \draw[penciline={jag ratio=0},ultra thick,blue] (3,3)  arc (90:0:2cm);
+  \draw[penciline={jag ratio=0,,arc angle base2=90},ultra thick,blue] (3,3)  arc (90:0:2cm);
   
   \node[penciline={jag ratio=0},draw,inner sep=0.5cm,fill=yellow,circle] (a) at (2,0) {};
   \node[decorate,draw,inner sep=0.3cm,fill=red] (b) at (2,-2) {};

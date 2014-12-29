@@ -38,9 +38,9 @@ In a `tex` you can use by adding `penciline` property to any drawn item:
 
 ![](example.png)
 
-See [example file](tikz-penciline-example.pdf) for further details.
+See [example file](tikz-penciline-example.tex) for further details.
 
-See [Documentation file](tikz-penciline-doc.pdf) for documentation.
+See [documentation file](tikz-penciline-doc.pdf) for documentation.
 
 ## License
 
