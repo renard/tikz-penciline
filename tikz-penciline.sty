@@ -41,12 +41,15 @@
                       \pgfdecoratedinputsegmentremainingdistance}
               }
               {%% 2nd control point
-                \pgfpointpolar
-                    {(\pgfkeysvalueof{/tikz/penciline/arc angle base2}+
-                      \pgfkeysvalueof{/tikz/penciline/arc angle ratio2}*rand)}
-                    {(\pgfkeysvalueof{/tikz/penciline/arc radius base2}+
-                      \pgfkeysvalueof{/tikz/penciline/arc radius ratio2}*rand)*
-                      \pgfdecoratedinputsegmentremainingdistance}
+                \pgfpointadd
+                    {\pgfpointdecoratedinputsegmentlast}
+                    {\pgfpointpolar
+                      {(\pgfkeysvalueof{/tikz/penciline/arc angle base2}+
+                        \pgfkeysvalueof{/tikz/penciline/arc angle ratio2}*rand)}
+                      {(\pgfkeysvalueof{/tikz/penciline/arc radius base2}+
+                        \pgfkeysvalueof{/tikz/penciline/arc radius ratio2}*rand)*
+                        \pgfdecoratedinputsegmentremainingdistance}
+                    }
               }
               {% 2nd point (1st one is implicit)
                 \pgfpointadd
@@ -101,8 +104,8 @@
     arc angle ratio1/.initial = 10,
     arc radius base1/.initial = 0.3,
     arc radius ratio1/.initial = 0.05,
-    arc angle base2/.initial = 20,
-    arc angle ratio2/.initial = 10,
+    arc angle base2/.initial = -90,
+    arc angle ratio2/.initial = -10,
     arc radius base2/.initial = 0.7,
     arc radius ratio2/.initial = 0.05,
     x offset/.initial = 1,
@@ -113,8 +116,8 @@
     penciline/.cd,
     #1,
     /tikz/.cd,
+    decoration=penciline
   },
-  decorate,
-  decoration=penciline
+  %% decorate,
 }
 
